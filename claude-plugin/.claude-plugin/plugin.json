@@ -1,0 +1,13 @@
+{
+  "name": "monday",
+  "displayName": "monday.com",
+  "description": "Interact with monday.com boards, items, and updates directly from Claude Code",
+  "version": "1.0.0",
+  "author": {
+    "name": "Alex Reznik"
+  },
+  "homepage": "https://github.com/alexreznik/monday-cli",
+  "repository": "https://github.com/alexreznik/monday-cli",
+  "license": "MIT",
+  "keywords": ["monday.com", "project-management", "tasks", "boards", "productivity"]
+}

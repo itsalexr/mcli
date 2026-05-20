@@ -1,0 +1,4 @@
+#!/bin/sh
+# Wrapper: runs mcli via npx so no global install is needed.
+# On first run npx downloads @alexreznik/mcli; subsequent runs use the cache.
+exec npx --yes @alexreznik/mcli "$@"

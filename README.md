@@ -1,45 +1,41 @@
 # mcli — monday.com CLI
 
-A TypeScript CLI for monday.com's GraphQL API.
+A CLI for monday.com's GraphQL API. Works standalone or as a skill inside Claude Code and other coding agents.
 
-## Installation
+## Install
 
 ```bash
-npm install
-npm run build
-npm install -g .
+npm install -g @alexreznik/mcli
 ```
 
 Or run without installing:
 
 ```bash
-node dist/index.js <command>
+npx @alexreznik/mcli boards list
 ```
 
 ## Authentication
 
+Get your API token: **monday.com → Avatar → Administration → Connections → Personal API Token**
+
 ```bash
-mcli auth login --token YOUR_MONDAY_API_TOKEN
-mcli auth status   # verify token, shows current user
-mcli auth logout   # remove token from .env
+mcli auth login    # interactive setup, saves token to ~/.env
+mcli auth status   # verify token and show current user
+mcli auth logout   # remove stored token
 ```
 
-Your token is stored in `.env` in the project directory. You can also set `MONDAY_TOKEN` as an environment variable directly.
+Or set the environment variable directly:
 
-Get your API token from monday.com: **Avatar → Administration → Connections → Personal API Token**.
+```bash
+export MONDAY_TOKEN=your_token_here
+```
 
 ## Commands
 
-### User
+### User & workspaces
 
 ```bash
 mcli me
-mcli me --table
-```
-
-### Workspaces
-
-```bash
 mcli workspaces
 mcli workspaces --limit 10 --page 2
 ```
@@ -47,8 +43,8 @@ mcli workspaces --limit 10 --page 2
 ### Boards
 
 ```bash
-mcli boards
-mcli boards --workspace-id 12345
+mcli boards list
+mcli boards list --workspace-id 12345
 mcli boards get <boardId>
 ```
 
@@ -65,7 +61,7 @@ mcli items create <boardId> --name "My Task" --group-id grp1 --column-values '{"
 mcli items update-columns <boardId> <itemId> '{"status": "In Progress"}'
 ```
 
-### Updates (Comments)
+### Updates (comments)
 
 ```bash
 mcli updates create <itemId> "This is a comment"
@@ -81,13 +77,55 @@ mcli graphql 'query GetBoard($id: ID!) { boards(ids: [$id]) { id name } }' --var
 
 ## Output
 
-All commands output JSON by default. Add `--table` for human-readable tables:
+All commands output JSON by default. Add `--table` for human-readable output:
 
 ```bash
-mcli boards --table
+mcli boards list --table
 mcli items list <boardId> --table
-mcli workspaces --table
 ```
+
+---
+
+## Use with coding agents
+
+### Claude Code (plugin — recommended)
+
+Paste into Claude Code:
+
+```
+/plugin marketplace add alexreznik/monday-cli
+/plugin install monday@monday-cli
+/reload-plugins
+```
+
+The plugin puts `mcli` in PATH automatically. The Claude Code plugin lives in `claude-plugin/` inside this repo.
+
+### Any agent (instructions snippet)
+
+Add this to your agent's context file and it will use `mcli` for monday.com tasks:
+
+| Agent | File |
+|---|---|
+| Claude Code | `CLAUDE.md` |
+| Codex / OpenCode | `AGENTS.md` |
+| Gemini CLI | `GEMINI.md` |
+| Cursor | `.cursor/rules` |
+| Copilot | `.github/copilot-instructions.md` |
+
+```markdown
+## monday.com
+Use `npx @alexreznik/mcli` to interact with monday.com. No install needed.
+Set MONDAY_TOKEN env var for auth, or run `npx @alexreznik/mcli auth login` once.
+
+Key commands:
+- `npx @alexreznik/mcli boards list [--workspace-id <id>]`
+- `npx @alexreznik/mcli items list <boardId> [--columns] [--table]`
+- `npx @alexreznik/mcli items create <boardId> --name "Task"`
+- `npx @alexreznik/mcli updates create <itemId> "comment text"`
+- `npx @alexreznik/mcli graphql '<query>'`
+```
+
+---
 
 ## Development
 
@@ -98,11 +136,16 @@ npx jest --testPathPattern=boards   # run a specific module's tests
 npm run dev            # run via ts-node (no build step)
 ```
 
+## Publishing
+
+```bash
+npm run build
+npm publish --access public
+```
+
 ## Configuration
 
-| Variable | Description | Default |
-|---|---|---|
-| `MONDAY_TOKEN` | API token (required) | — |
-| `API_VERSION` | monday.com API version | `2026-07` |
-
-Set via `.env` file or environment variable.
+| Variable | Description |
+|---|---|
+| `MONDAY_TOKEN` | API token (required) |
+| `API_VERSION` | monday.com API version (default: `2026-07`) |

@@ -1,0 +1,19 @@
+{
+  "name": "monday-plugin",
+  "owner": {
+    "name": "Alex Reznik"
+  },
+  "description": "monday.com skill for Claude Code",
+  "plugins": [
+    {
+      "name": "monday",
+      "displayName": "monday.com",
+      "description": "Interact with monday.com boards, items, and updates directly from Claude Code",
+      "source": "./claude-plugin",
+      "category": "productivity",
+      "tags": ["monday.com", "project-management", "tasks", "boards"],
+      "homepage": "https://github.com/alexreznik/monday-cli",
+      "license": "MIT"
+    }
+  ]
+}
