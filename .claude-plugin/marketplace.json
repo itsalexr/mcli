@@ -12,7 +12,7 @@
       "source": "./claude-plugin",
       "category": "productivity",
       "tags": ["monday.com", "project-management", "tasks", "boards"],
-      "homepage": "https://github.com/alexreznik/monday-cli",
+      "homepage": "https://github.com/itsalexr/mcli",
       "license": "MIT"
     }
   ]

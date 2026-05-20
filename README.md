@@ -5,13 +5,13 @@ A CLI for monday.com's GraphQL API. Works standalone or as a skill inside Claude
 ## Install
 
 ```bash
-npm install -g @alexreznik/mcli
+npm install -g @itsalexr/mcli
 ```
 
 Or run without installing:
 
 ```bash
-npx @alexreznik/mcli boards list
+npx @itsalexr/mcli boards list
 ```
 
 ## Authentication
@@ -93,7 +93,7 @@ mcli items list <boardId> --table
 Paste into Claude Code:
 
 ```
-/plugin marketplace add alexreznik/monday-cli
+/plugin marketplace add itsalexr/mcli
 /plugin install monday@monday-cli
 /reload-plugins
 ```
@@ -114,15 +114,15 @@ Add this to your agent's context file and it will use `mcli` for monday.com task
 
 ```markdown
 ## monday.com
-Use `npx @alexreznik/mcli` to interact with monday.com. No install needed.
-Set MONDAY_TOKEN env var for auth, or run `npx @alexreznik/mcli auth login` once.
+Use `npx @itsalexr/mcli` to interact with monday.com. No install needed.
+Set MONDAY_TOKEN env var for auth, or run `npx @itsalexr/mcli auth login` once.
 
 Key commands:
-- `npx @alexreznik/mcli boards list [--workspace-id <id>]`
-- `npx @alexreznik/mcli items list <boardId> [--columns] [--table]`
-- `npx @alexreznik/mcli items create <boardId> --name "Task"`
-- `npx @alexreznik/mcli updates create <itemId> "comment text"`
-- `npx @alexreznik/mcli graphql '<query>'`
+- `npx @itsalexr/mcli boards list [--workspace-id <id>]`
+- `npx @itsalexr/mcli items list <boardId> [--columns] [--table]`
+- `npx @itsalexr/mcli items create <boardId> --name "Task"`
+- `npx @itsalexr/mcli updates create <itemId> "comment text"`
+- `npx @itsalexr/mcli graphql '<query>'`
 ```
 
 ---

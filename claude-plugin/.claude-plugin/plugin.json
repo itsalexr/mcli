@@ -6,8 +6,8 @@
   "author": {
     "name": "Alex Reznik"
   },
-  "homepage": "https://github.com/alexreznik/monday-cli",
-  "repository": "https://github.com/alexreznik/monday-cli",
+  "homepage": "https://github.com/itsalexr/mcli",
+  "repository": "https://github.com/itsalexr/mcli",
   "license": "MIT",
   "keywords": ["monday.com", "project-management", "tasks", "boards", "productivity"]
 }

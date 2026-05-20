@@ -1,5 +1,5 @@
 {
-  "name": "@alexreznik/mcli",
+  "name": "@itsalexr/mcli",
   "version": "1.0.0",
   "description": "monday.com CLI for Claude Code and coding agents",
   "bin": {
