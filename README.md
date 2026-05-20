@@ -102,30 +102,26 @@ Requires Claude Code v2.1.128+ (desktop or CLI). Type these as **slash commands*
 
 The plugin puts `mcli` in PATH automatically. The Claude Code plugin lives in `claude-plugin/` inside this repo.
 
-### Any agent (instructions snippet)
+### Any agent (one-time setup prompt)
 
-Add this to your agent's context file and it will use `mcli` for monday.com tasks:
+Paste this as a message to your agent and it will set itself up:
 
-| Agent | File |
-|---|---|
-| Claude Code | `CLAUDE.md` |
-| Codex / OpenCode | `AGENTS.md` |
-| Gemini CLI | `GEMINI.md` |
-| Cursor | `.cursor/rules` |
-| Copilot | `.github/copilot-instructions.md` |
-
-```markdown
-## monday.com
-Use `npx @itsalexr/mcli` to interact with monday.com. No install needed.
-Set MONDAY_TOKEN env var for auth, or run `npx @itsalexr/mcli auth login` once.
-
-Key commands:
-- `npx @itsalexr/mcli boards list [--workspace-id <id>]`
-- `npx @itsalexr/mcli items list <boardId> [--columns] [--table]`
-- `npx @itsalexr/mcli items create <boardId> --name "Task"`
-- `npx @itsalexr/mcli updates create <itemId> "comment text"`
-- `npx @itsalexr/mcli graphql '<query>'`
-```
+> Set up the monday.com skill for this project. Add the following to this project's agent context file (e.g. `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursor/rules`, or `.github/copilot-instructions.md` — whichever applies to you):
+>
+> ```
+> ## monday.com
+> Use `npx @itsalexr/mcli` to interact with monday.com. No install needed.
+> Set MONDAY_TOKEN env var for auth, or run `npx @itsalexr/mcli auth login` once.
+>
+> Key commands:
+> - `npx @itsalexr/mcli boards list [--workspace-id <id>]`
+> - `npx @itsalexr/mcli items list <boardId> [--columns] [--table]`
+> - `npx @itsalexr/mcli items create <boardId> --name "Task"`
+> - `npx @itsalexr/mcli updates create <itemId> "comment text"`
+> - `npx @itsalexr/mcli graphql '<query>'`
+> ```
+>
+> Then check whether `MONDAY_TOKEN` is set in the environment. If not, run `npx @itsalexr/mcli auth login` so I can authenticate.
 
 ---
 
