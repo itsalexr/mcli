@@ -111,9 +111,11 @@ mcli items list <boardId> --table
 
 ## Use with coding agents
 
-### Claude Code (plugin — recommended)
+### Claude Code CLI (plugin — recommended)
 
-Requires Claude Code v2.1.128+ (desktop or CLI). Type these as **slash commands** directly in the Claude Code chat — not as prompts to the AI:
+> **Note:** These slash commands only work in the Claude Code CLI (`claude` in terminal) and VS Code/JetBrains extensions. They do not work in the Claude desktop app.
+
+Requires Claude Code v2.1.128+. Type these as **slash commands** directly in the Claude Code chat — not as prompts to the AI:
 
 ```
 /plugin marketplace add itsalexr/mcli
