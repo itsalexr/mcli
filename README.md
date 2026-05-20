@@ -92,7 +92,7 @@ mcli items list <boardId> --table
 
 ### Claude Code (plugin — recommended)
 
-Paste into Claude Code:
+Requires Claude Code v2.1.128+ (desktop or CLI). Type these as **slash commands** directly in the Claude Code chat — not as prompts to the AI:
 
 ```
 /plugin marketplace add itsalexr/mcli
