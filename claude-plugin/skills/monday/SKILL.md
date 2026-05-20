@@ -18,7 +18,7 @@ mcli boards list                                           # list all boards
 mcli boards list --workspace-id <id>                      # filter by workspace
 mcli boards get <boardId>                                  # full board details
 mcli boards schema <boardId>                               # columns and groups only
-mcli boards create --name "Name" [--kind public|private] [--workspace-id <id>]
+mcli boards create --name "Name" [--kind public|private|share] [--workspace-id <id>]
 mcli boards activity <boardId> [--from <ISO date>] [--to <ISO date>] [--limit 50]
 ```
 
@@ -45,7 +45,7 @@ mcli groups create <boardId> --name "Group name" [--color done|stuck|working_on_
 
 **Users**
 ```
-mcli users list                                            # list all account users
+mcli users list [--limit 200] [--page 1]                   # list users (paginates)
 ```
 
 **Search**

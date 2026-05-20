@@ -135,7 +135,7 @@ const BoardsListOptionsSchema = z.object({
 
 const BoardCreateOptionsSchema = z.object({
   name: z.string().min(1, 'Board name is required'),
-  kind: z.enum(['public', 'private']).default('public'),
+  kind: z.enum(['public', 'private', 'share']).default('public'),
   description: z.string().optional(),
   workspaceId: z.string().optional(),
 });
@@ -225,7 +225,7 @@ export function registerBoards(program: Command, clientFactory: () => GraphQLCli
     .command('create')
     .description('Create a new board')
     .requiredOption('--name <name>', 'Board name')
-    .option('--kind <kind>', 'Board kind: public or private', 'public')
+    .option('--kind <kind>', 'Board kind: public, private, or share', 'public')
     .option('--description <text>', 'Board description')
     .option('--workspace-id <id>', 'Workspace ID')
     .action(async (opts: { name: string; kind: string; description?: string; workspaceId?: string }) => {

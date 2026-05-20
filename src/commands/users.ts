@@ -19,13 +19,14 @@ export interface UsersListResult {
 
 export async function fetchUsers(
   client: GraphQLClient,
-  opts: { limit: number }
+  opts: { limit: number; page: number }
 ): Promise<UsersListResult> {
-  return gqlRequest<UsersListResult>(client, LIST_USERS_QUERY, { limit: opts.limit });
+  return gqlRequest<UsersListResult>(client, LIST_USERS_QUERY, { limit: opts.limit, page: opts.page });
 }
 
 const UsersListOptionsSchema = z.object({
   limit: z.coerce.number().int().positive().default(200),
+  page: z.coerce.number().int().positive().default(1),
 });
 
 export function registerUsers(program: Command, clientFactory: () => GraphQLClient): void {
@@ -33,14 +34,15 @@ export function registerUsers(program: Command, clientFactory: () => GraphQLClie
 
   users
     .command('list', { isDefault: true })
-    .description('List all users in the account')
+    .description('List users in the account')
     .option('--limit <n>', 'Number of users to return', '200')
-    .action(async (opts: { limit: string }) => {
+    .option('--page <n>', 'Page number', '1')
+    .action(async (opts: { limit: string; page: string }) => {
       const format: OutputFormat = (program.opts().table as boolean | undefined) ? 'table' : 'json';
       try {
-        const { limit } = UsersListOptionsSchema.parse(opts);
+        const { limit, page } = UsersListOptionsSchema.parse(opts);
         const client = clientFactory();
-        const data = await fetchUsers(client, { limit });
+        const data = await fetchUsers(client, { limit, page });
         if (format === 'table') {
           printTable(
             ['ID', 'Name', 'Email', 'Title', 'Admin'],

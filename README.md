@@ -17,9 +17,14 @@ Paste this as a message to your agent and it will set itself up:
 >
 > Key commands:
 > - `npx @itsalexr/mcli boards list [--workspace-id <id>]`
+> - `npx @itsalexr/mcli boards schema <boardId>` — columns and groups
 > - `npx @itsalexr/mcli items list <boardId> [--columns] [--table]`
 > - `npx @itsalexr/mcli items create <boardId> --name "Task"`
+> - `npx @itsalexr/mcli items delete <itemId>`
+> - `npx @itsalexr/mcli updates list <itemId>` — read comments
 > - `npx @itsalexr/mcli updates create <itemId> "comment text"`
+> - `npx @itsalexr/mcli users list`
+> - `npx @itsalexr/mcli search "term"`
 > - `npx @itsalexr/mcli graphql '<query>'`
 > ```
 >
@@ -69,6 +74,10 @@ mcli workspaces --limit 10 --page 2
 mcli boards list
 mcli boards list --workspace-id 12345
 mcli boards get <boardId>
+mcli boards schema <boardId>                                # columns and groups only
+mcli boards create --name "My Board"                        # kind: public (default), private, share
+mcli boards activity <boardId>                              # last 30 days by default
+mcli boards activity <boardId> --from 2026-01-01 --to 2026-02-01
 ```
 
 ### Items
@@ -82,12 +91,39 @@ mcli items create <boardId> --name "My Task"
 mcli items create <boardId> --name "My Task" --group-id grp1 --column-values '{"status": "Done"}'
 
 mcli items update-columns <boardId> <itemId> '{"status": "In Progress"}'
+
+mcli items delete <itemId>
+mcli items move <itemId> --group <groupId>
 ```
 
 ### Updates (comments)
 
 ```bash
 mcli updates create <itemId> "This is a comment"
+mcli updates list <itemId>                   # read comments
+mcli updates list <itemId> --limit 10 --page 2
+```
+
+### Groups
+
+```bash
+mcli groups create <boardId> --name "Sprint 1"
+mcli groups create <boardId> --name "Done" --color done
+```
+
+### Users
+
+```bash
+mcli users list
+mcli users list --table
+mcli users list --limit 200 --page 2        # paginate for large accounts
+```
+
+### Search
+
+```bash
+mcli search "tasks"                          # search boards by name
+mcli search "tasks" --table
 ```
 
 ### Raw GraphQL
