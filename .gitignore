@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+mcp/
+
+# Planning / dev notes
+PLAN.md
+worklog.md
+
+# macOS
+.DS_Store
+
+# Test coverage
+coverage/
+
+# Editor
+.vscode/
+.idea/

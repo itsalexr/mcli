@@ -1,0 +1,32 @@
+{
+  "name": "mcli",
+  "version": "1.0.0",
+  "description": "monday.com CLI",
+  "bin": {
+    "mcli": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.3",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
+    "graphql": "^16.9.0",
+    "graphql-request": "^7.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}
