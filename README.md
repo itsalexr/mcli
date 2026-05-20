@@ -1,5 +1,7 @@
 # mcli — monday.com CLI
 
+> Fresh out of a coding agent. Bugs are expected — [open an issue](https://github.com/itsalexr/mcli/issues) if you hit one.
+
 A CLI for monday.com's GraphQL API. Works standalone or as a skill inside Claude Code and other coding agents.
 
 ## Install
