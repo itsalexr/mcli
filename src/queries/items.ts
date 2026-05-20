@@ -61,3 +61,19 @@ export const CHANGE_ITEM_COLUMN_VALUES_MUTATION = gql`
     }
   }
 `;
+
+export const DELETE_ITEM_MUTATION = gql`
+  mutation deleteItem($itemId: ID!) {
+    delete_item(item_id: $itemId) {
+      id
+    }
+  }
+`;
+
+export const MOVE_ITEM_TO_GROUP_MUTATION = gql`
+  mutation moveItemToGroup($itemId: ID!, $groupId: String!) {
+    move_item_to_group(item_id: $itemId, group_id: $groupId) {
+      id
+    }
+  }
+`;

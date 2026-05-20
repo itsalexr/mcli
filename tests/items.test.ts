@@ -2,6 +2,8 @@ import {
   fetchItems,
   createItem,
   updateItemColumns,
+  deleteItem,
+  moveItemToGroup,
   ItemsPageResult,
 } from '../src/commands/items';
 import { createMockClient } from './helpers/mock-client';
@@ -138,5 +140,40 @@ describe('updateItemColumns', () => {
     const mock = createMockClient();
     mock.setError('Invalid column');
     await expect(updateItemColumns(mock.client, '10', '101', '{}')).rejects.toThrow('Invalid column');
+  });
+});
+
+describe('deleteItem', () => {
+  it('deletes item and returns id', async () => {
+    const mock = createMockClient();
+    mock.setResponse({ delete_item: { id: '101' } });
+    const result = await deleteItem(mock.client, '101');
+    expect(result.delete_item.id).toBe('101');
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.itemId).toBe('101');
+  });
+
+  it('propagates GraphQL errors', async () => {
+    const mock = createMockClient();
+    mock.setError('Item not found');
+    await expect(deleteItem(mock.client, '999')).rejects.toThrow('Item not found');
+  });
+});
+
+describe('moveItemToGroup', () => {
+  it('moves item to group', async () => {
+    const mock = createMockClient();
+    mock.setResponse({ move_item_to_group: { id: '101' } });
+    const result = await moveItemToGroup(mock.client, '101', 'grp_done');
+    expect(result.move_item_to_group.id).toBe('101');
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.itemId).toBe('101');
+    expect(vars.groupId).toBe('grp_done');
+  });
+
+  it('propagates GraphQL errors', async () => {
+    const mock = createMockClient();
+    mock.setError('Group not found');
+    await expect(moveItemToGroup(mock.client, '101', 'bad_grp')).rejects.toThrow('Group not found');
   });
 });

@@ -19,3 +19,4 @@ coverage/
 
 # Claude Code local settings
 .claude/
+.gstack/

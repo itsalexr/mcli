@@ -8,6 +8,8 @@ import {
   GET_BOARD_ITEMS_PAGE_QUERY,
   CREATE_ITEM_MUTATION,
   CHANGE_ITEM_COLUMN_VALUES_MUTATION,
+  DELETE_ITEM_MUTATION,
+  MOVE_ITEM_TO_GROUP_MUTATION,
 } from '../queries/items';
 
 export interface ItemsPageResult {
@@ -32,6 +34,14 @@ export interface CreateItemResult {
 
 export interface UpdateColumnsResult {
   change_multiple_column_values: { id: string; name: string; url: string };
+}
+
+export interface DeleteItemResult {
+  delete_item: { id: string };
+}
+
+export interface MoveItemResult {
+  move_item_to_group: { id: string };
 }
 
 export async function fetchItems(
@@ -71,6 +81,21 @@ export async function updateItemColumns(
     itemId,
     columnValues: columnValuesJson,
   });
+}
+
+export async function deleteItem(
+  client: GraphQLClient,
+  itemId: string
+): Promise<DeleteItemResult> {
+  return gqlRequest<DeleteItemResult>(client, DELETE_ITEM_MUTATION, { itemId });
+}
+
+export async function moveItemToGroup(
+  client: GraphQLClient,
+  itemId: string,
+  groupId: string
+): Promise<MoveItemResult> {
+  return gqlRequest<MoveItemResult>(client, MOVE_ITEM_TO_GROUP_MUTATION, { itemId, groupId });
 }
 
 const isValidJson = (v: string | undefined) => {
@@ -208,6 +233,35 @@ export function registerItems(program: Command, clientFactory: () => GraphQLClie
           console.error(chalk.red('Validation error: ' + err.issues.map((i) => i.message).join(', ')));
           process.exit(1);
         }
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  items
+    .command('delete <itemId>')
+    .description('Delete an item')
+    .action(async (itemId: string) => {
+      try {
+        const client = clientFactory();
+        const result = await deleteItem(client, itemId);
+        printJson({ deleted: true, id: result.delete_item.id });
+      } catch (err) {
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  items
+    .command('move <itemId>')
+    .description('Move an item to a different group')
+    .requiredOption('--group <groupId>', 'Target group ID')
+    .action(async (itemId: string, opts: { group: string }) => {
+      try {
+        const client = clientFactory();
+        const result = await moveItemToGroup(client, itemId, opts.group);
+        printJson({ moved: true, id: result.move_item_to_group.id, groupId: opts.group });
+      } catch (err) {
         console.error(chalk.red((err as Error).message));
         process.exit(1);
       }

@@ -10,6 +10,9 @@ import { registerBoards } from './commands/boards';
 import { registerItems } from './commands/items';
 import { registerUpdates } from './commands/updates';
 import { registerGraphql } from './commands/graphql';
+import { registerGroups } from './commands/groups';
+import { registerUsers } from './commands/users';
+import { registerSearch } from './commands/search';
 
 const program = new Command();
 
@@ -28,6 +31,9 @@ registerBoards(program, clientFactory);
 registerItems(program, clientFactory);
 registerUpdates(program, clientFactory);
 registerGraphql(program, clientFactory);
+registerGroups(program, clientFactory);
+registerUsers(program, clientFactory);
+registerSearch(program, clientFactory);
 
 program.parseAsync(process.argv).catch((err: Error) => {
   console.error(chalk.red('Error:'), err.message);
