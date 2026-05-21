@@ -1,6 +1,6 @@
 {
   "name": "@itsalexr/mcli",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "monday.com CLI for Claude Code and coding agents",
   "bin": {
     "mcli": "dist/index.js"

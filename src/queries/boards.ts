@@ -89,3 +89,30 @@ export const GET_BOARD_ACTIVITY_QUERY = gql`
     }
   }
 `;
+
+export const CREATE_COLUMN_MUTATION = gql`
+  mutation createColumn(
+    $boardId: ID!
+    $columnType: ColumnType!
+    $columnTitle: String!
+    $columnDescription: String
+  ) {
+    create_column(
+      board_id: $boardId
+      column_type: $columnType
+      title: $columnTitle
+      description: $columnDescription
+    ) {
+      id
+      title
+    }
+  }
+`;
+
+export const DELETE_COLUMN_MUTATION = gql`
+  mutation deleteColumn($boardId: ID!, $columnId: String!) {
+    delete_column(board_id: $boardId, column_id: $columnId) {
+      id
+    }
+  }
+`;

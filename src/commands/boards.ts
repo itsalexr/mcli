@@ -10,6 +10,8 @@ import {
   GET_BOARD_SCHEMA_QUERY,
   CREATE_BOARD_MUTATION,
   GET_BOARD_ACTIVITY_QUERY,
+  CREATE_COLUMN_MUTATION,
+  DELETE_COLUMN_MUTATION,
 } from '../queries/boards';
 
 export interface BoardsListResult {
@@ -56,6 +58,14 @@ export interface BoardActivityResult {
       created_at: string;
     }>;
   }>;
+}
+
+export interface CreateColumnResult {
+  create_column: { id: string; title: string };
+}
+
+export interface DeleteColumnResult {
+  delete_column: { id: string };
 }
 
 export async function fetchBoards(
@@ -108,6 +118,27 @@ export async function fetchBoardActivity(
   });
 }
 
+export async function createColumn(
+  client: GraphQLClient,
+  boardId: string,
+  opts: { type: string; title: string; description?: string }
+): Promise<CreateColumnResult> {
+  return gqlRequest<CreateColumnResult>(client, CREATE_COLUMN_MUTATION, {
+    boardId,
+    columnType: opts.type,
+    columnTitle: opts.title,
+    columnDescription: opts.description,
+  });
+}
+
+export async function deleteColumn(
+  client: GraphQLClient,
+  boardId: string,
+  columnId: string
+): Promise<DeleteColumnResult> {
+  return gqlRequest<DeleteColumnResult>(client, DELETE_COLUMN_MUTATION, { boardId, columnId });
+}
+
 function printBoardInfo(board: BoardInfoResult['boards'][0], format: OutputFormat): void {
   if (format === 'json') {
     printJson(board);
@@ -142,6 +173,12 @@ const BoardCreateOptionsSchema = z.object({
 
 const BoardActivityOptionsSchema = z.object({
   limit: z.coerce.number().int().positive().default(50),
+});
+
+const ColumnCreateOptionsSchema = z.object({
+  type: z.string().min(1, 'Column type is required'),
+  title: z.string().min(1, 'Column title is required'),
+  description: z.string().optional(),
 });
 
 export function registerBoards(program: Command, clientFactory: () => GraphQLClient): void {
@@ -239,6 +276,44 @@ export function registerBoards(program: Command, clientFactory: () => GraphQLCli
           console.error(chalk.red('Validation error: ' + err.issues.map((i) => i.message).join(', ')));
           process.exit(1);
         }
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  const columns = boards.command('columns').description('Manage board columns');
+
+  columns
+    .command('create <boardId>')
+    .description('Add a column to a board')
+    .requiredOption('--type <type>', 'Column type (e.g. text, status, date, numbers, person)')
+    .requiredOption('--title <title>', 'Column title')
+    .option('--description <text>', 'Column description')
+    .action(async (boardId: string, opts: { type: string; title: string; description?: string }) => {
+      try {
+        const validated = ColumnCreateOptionsSchema.parse(opts);
+        const client = clientFactory();
+        const result = await createColumn(client, boardId, validated);
+        printJson(result.create_column);
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          console.error(chalk.red('Validation error: ' + err.issues.map((i) => i.message).join(', ')));
+          process.exit(1);
+        }
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  columns
+    .command('delete <boardId> <columnId>')
+    .description('Delete a column from a board')
+    .action(async (boardId: string, columnId: string) => {
+      try {
+        const client = clientFactory();
+        const result = await deleteColumn(client, boardId, columnId);
+        printJson({ deleted: true, id: result.delete_column.id });
+      } catch (err) {
         console.error(chalk.red((err as Error).message));
         process.exit(1);
       }

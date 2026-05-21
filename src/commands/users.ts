@@ -4,7 +4,7 @@ import { z } from 'zod';
 import chalk from 'chalk';
 import { gqlRequest } from '../client';
 import { printJson, printTable, OutputFormat } from '../output';
-import { LIST_USERS_QUERY } from '../queries/users';
+import { LIST_USERS_QUERY, LIST_TEAMS_QUERY } from '../queries/users';
 
 export interface UsersListResult {
   users: Array<{
@@ -17,6 +17,16 @@ export interface UsersListResult {
   }>;
 }
 
+export interface TeamsListResult {
+  teams: Array<{
+    id: string;
+    name: string;
+    is_guest: boolean;
+    picture_url: string | null;
+    users: Array<{ id: string; name: string; email: string }>;
+  }>;
+}
+
 export async function fetchUsers(
   client: GraphQLClient,
   opts: { limit: number; page: number }
@@ -24,9 +34,20 @@ export async function fetchUsers(
   return gqlRequest<UsersListResult>(client, LIST_USERS_QUERY, { limit: opts.limit, page: opts.page });
 }
 
+export async function fetchTeams(
+  client: GraphQLClient,
+  opts: { limit: number }
+): Promise<TeamsListResult> {
+  return gqlRequest<TeamsListResult>(client, LIST_TEAMS_QUERY, { limit: opts.limit });
+}
+
 const UsersListOptionsSchema = z.object({
   limit: z.coerce.number().int().positive().default(200),
   page: z.coerce.number().int().positive().default(1),
+});
+
+const TeamsListOptionsSchema = z.object({
+  limit: z.coerce.number().int().positive().default(200),
 });
 
 export function registerUsers(program: Command, clientFactory: () => GraphQLClient): void {
@@ -50,6 +71,34 @@ export function registerUsers(program: Command, clientFactory: () => GraphQLClie
           );
         } else {
           printJson(data.users);
+        }
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          console.error(chalk.red('Validation error: ' + err.issues.map((i) => i.message).join(', ')));
+          process.exit(1);
+        }
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  users
+    .command('teams')
+    .description('List teams in the account')
+    .option('--limit <n>', 'Number of teams to return', '200')
+    .action(async (opts: { limit: string }) => {
+      const format: OutputFormat = (program.opts().table as boolean | undefined) ? 'table' : 'json';
+      try {
+        const { limit } = TeamsListOptionsSchema.parse(opts);
+        const client = clientFactory();
+        const data = await fetchTeams(client, { limit });
+        if (format === 'table') {
+          printTable(
+            ['ID', 'Name', 'Guest', 'Members'],
+            data.teams.map((t) => [t.id, t.name, t.is_guest ? 'yes' : 'no', String(t.users.length)])
+          );
+        } else {
+          printJson(data.teams);
         }
       } catch (err) {
         if (err instanceof z.ZodError) {

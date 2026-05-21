@@ -1,4 +1,4 @@
-import { fetchWorkspaces, WorkspacesResult } from '../src/commands/workspaces';
+import { fetchWorkspaces, createWorkspace, WorkspacesResult } from '../src/commands/workspaces';
 import { createMockClient } from './helpers/mock-client';
 
 const WORKSPACES_RESPONSE = {
@@ -62,5 +62,35 @@ describe('fetchWorkspaces', () => {
     expect(output).toContain('ID');
     expect(output).toContain('Main');
     expect(output).toContain('Dev');
+  });
+});
+
+const CREATE_WORKSPACE_RESPONSE = {
+  create_workspace: { id: '50', name: 'Dev Team' },
+};
+
+describe('createWorkspace', () => {
+  it('creates a workspace and returns id and name', async () => {
+    const mock = createMockClient();
+    mock.setResponse(CREATE_WORKSPACE_RESPONSE);
+    const result = await createWorkspace(mock.client, { name: 'Dev Team', kind: 'open' });
+    expect(result.create_workspace.id).toBe('50');
+    expect(result.create_workspace.name).toBe('Dev Team');
+  });
+
+  it('passes name, workspaceKind as variables', async () => {
+    const mock = createMockClient();
+    mock.setResponse(CREATE_WORKSPACE_RESPONSE);
+    await createWorkspace(mock.client, { name: 'Dev Team', kind: 'closed', description: 'Internal' });
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.name).toBe('Dev Team');
+    expect(vars.workspaceKind).toBe('closed');
+    expect(vars.description).toBe('Internal');
+  });
+
+  it('propagates errors', async () => {
+    const mock = createMockClient();
+    mock.setError('No permission');
+    await expect(createWorkspace(mock.client, { name: 'x', kind: 'open' })).rejects.toThrow('No permission');
   });
 });

@@ -4,11 +4,15 @@ import {
   fetchBoardSchema,
   createBoard,
   fetchBoardActivity,
+  createColumn,
+  deleteColumn,
   BoardsListResult,
   BoardInfoResult,
   BoardSchemaResult,
   CreateBoardResult,
   BoardActivityResult,
+  CreateColumnResult,
+  DeleteColumnResult,
 } from '../src/commands/boards';
 import { createMockClient } from './helpers/mock-client';
 
@@ -222,5 +226,71 @@ describe('fetchBoardActivity', () => {
     const mock = createMockClient();
     mock.setError('Server error');
     await expect(fetchBoardActivity(mock.client, '10', { from: '2024-01-01', to: '2024-01-31', limit: 50 })).rejects.toThrow('Server error');
+  });
+});
+
+const CREATE_COLUMN_RESPONSE: CreateColumnResult = {
+  create_column: { id: 'col_abc', title: 'Notes' },
+};
+
+describe('createColumn', () => {
+  it('creates a column and returns id and title', async () => {
+    const mock = createMockClient();
+    mock.setResponse(CREATE_COLUMN_RESPONSE);
+    const result = await createColumn(mock.client, '10', { type: 'text', title: 'Notes' });
+    expect(result.create_column.id).toBe('col_abc');
+    expect(result.create_column.title).toBe('Notes');
+  });
+
+  it('passes boardId, columnType, and columnTitle as variables', async () => {
+    const mock = createMockClient();
+    mock.setResponse(CREATE_COLUMN_RESPONSE);
+    await createColumn(mock.client, '10', { type: 'status', title: 'Priority' });
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.boardId).toBe('10');
+    expect(vars.columnType).toBe('status');
+    expect(vars.columnTitle).toBe('Priority');
+  });
+
+  it('passes description when provided', async () => {
+    const mock = createMockClient();
+    mock.setResponse(CREATE_COLUMN_RESPONSE);
+    await createColumn(mock.client, '10', { type: 'text', title: 'Notes', description: 'Extra notes' });
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.columnDescription).toBe('Extra notes');
+  });
+
+  it('propagates errors', async () => {
+    const mock = createMockClient();
+    mock.setError('Board not found');
+    await expect(createColumn(mock.client, '99', { type: 'text', title: 'x' })).rejects.toThrow('Board not found');
+  });
+});
+
+const DELETE_COLUMN_RESPONSE: DeleteColumnResult = {
+  delete_column: { id: 'col_abc' },
+};
+
+describe('deleteColumn', () => {
+  it('deletes a column and returns id', async () => {
+    const mock = createMockClient();
+    mock.setResponse(DELETE_COLUMN_RESPONSE);
+    const result = await deleteColumn(mock.client, '10', 'col_abc');
+    expect(result.delete_column.id).toBe('col_abc');
+  });
+
+  it('passes boardId and columnId as variables', async () => {
+    const mock = createMockClient();
+    mock.setResponse(DELETE_COLUMN_RESPONSE);
+    await deleteColumn(mock.client, '42', 'col_xyz');
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.boardId).toBe('42');
+    expect(vars.columnId).toBe('col_xyz');
+  });
+
+  it('propagates errors', async () => {
+    const mock = createMockClient();
+    mock.setError('Column not found');
+    await expect(deleteColumn(mock.client, '10', 'bad_col')).rejects.toThrow('Column not found');
   });
 });

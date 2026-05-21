@@ -12,3 +12,19 @@ export const LIST_USERS_QUERY = gql`
     }
   }
 `;
+
+export const LIST_TEAMS_QUERY = gql`
+  query listTeams($limit: Int) {
+    teams(limit: $limit) {
+      id
+      name
+      is_guest
+      picture_url
+      users {
+        id
+        name
+        email
+      }
+    }
+  }
+`;

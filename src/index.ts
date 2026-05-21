@@ -13,13 +13,16 @@ import { registerGraphql } from './commands/graphql';
 import { registerGroups } from './commands/groups';
 import { registerUsers } from './commands/users';
 import { registerSearch } from './commands/search';
+import { registerDocs } from './commands/docs';
+import { registerFolders } from './commands/folders';
+import { registerNotifications } from './commands/notifications';
 
 const program = new Command();
 
 program
   .name('mcli')
   .description('monday.com CLI')
-  .version('1.1.1')
+  .version('1.2.0')
   .option('--table', 'Output as human-readable table instead of JSON');
 
 const clientFactory = () => createClient(loadConfig());
@@ -34,6 +37,9 @@ registerGraphql(program, clientFactory);
 registerGroups(program, clientFactory);
 registerUsers(program, clientFactory);
 registerSearch(program, clientFactory);
+registerDocs(program, clientFactory);
+registerFolders(program, clientFactory);
+registerNotifications(program, clientFactory);
 
 program.parseAsync(process.argv).catch((err: Error) => {
   console.error(chalk.red('Error:'), err.message);

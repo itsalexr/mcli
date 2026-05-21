@@ -10,6 +10,8 @@ import {
   CHANGE_ITEM_COLUMN_VALUES_MUTATION,
   DELETE_ITEM_MUTATION,
   MOVE_ITEM_TO_GROUP_MUTATION,
+  CREATE_SUBITEM_MUTATION,
+  DUPLICATE_ITEM_MUTATION,
 } from '../queries/items';
 
 export interface ItemsPageResult {
@@ -42,6 +44,14 @@ export interface DeleteItemResult {
 
 export interface MoveItemResult {
   move_item_to_group: { id: string };
+}
+
+export interface CreateSubitemResult {
+  create_subitem: { id: string; name: string; url: string; parent_item: { id: string } };
+}
+
+export interface DuplicateItemResult {
+  duplicate_item: { id: string; name: string; url: string };
 }
 
 export async function fetchItems(
@@ -98,6 +108,27 @@ export async function moveItemToGroup(
   return gqlRequest<MoveItemResult>(client, MOVE_ITEM_TO_GROUP_MUTATION, { itemId, groupId });
 }
 
+export async function createSubitem(
+  client: GraphQLClient,
+  parentItemId: string,
+  opts: { name: string; columnValues?: string }
+): Promise<CreateSubitemResult> {
+  return gqlRequest<CreateSubitemResult>(client, CREATE_SUBITEM_MUTATION, {
+    parentItemId,
+    itemName: opts.name,
+    columnValues: opts.columnValues,
+  });
+}
+
+export async function duplicateItem(
+  client: GraphQLClient,
+  boardId: string,
+  itemId: string,
+  withUpdates?: boolean
+): Promise<DuplicateItemResult> {
+  return gqlRequest<DuplicateItemResult>(client, DUPLICATE_ITEM_MUTATION, { boardId, itemId, withUpdates });
+}
+
 const isValidJson = (v: string | undefined) => {
   if (!v) return true;
   try {
@@ -127,6 +158,14 @@ const UpdateColumnsSchema = z.object({
   columnValuesJson: z
     .string()
     .refine(isValidJson, { message: 'columnValuesJson must be valid JSON' }),
+});
+
+const SubitemCreateOptionsSchema = z.object({
+  name: z.string().min(1, 'Subitem name is required'),
+  columnValues: z
+    .string()
+    .optional()
+    .refine(isValidJson, { message: '--column-values must be valid JSON' }),
 });
 
 function formatColumnValues(
@@ -261,6 +300,43 @@ export function registerItems(program: Command, clientFactory: () => GraphQLClie
         const client = clientFactory();
         const result = await moveItemToGroup(client, itemId, opts.group);
         printJson({ moved: true, id: result.move_item_to_group.id, groupId: opts.group });
+      } catch (err) {
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  items
+    .command('subitem <parentItemId>')
+    .description('Create a subitem under a parent item')
+    .requiredOption('--name <name>', 'Subitem name')
+    .option('--column-values <json>', 'Column values as JSON string')
+    .action(async (parentItemId: string, opts: { name: string; columnValues?: string }) => {
+      try {
+        const validated = SubitemCreateOptionsSchema.parse(opts);
+        const client = clientFactory();
+        const result = await createSubitem(client, parentItemId, validated);
+        const s = result.create_subitem;
+        printJson({ id: s.id, name: s.name, url: s.url, parent_item_id: s.parent_item.id });
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          console.error(chalk.red('Validation error: ' + err.issues.map((i) => i.message).join(', ')));
+          process.exit(1);
+        }
+        console.error(chalk.red((err as Error).message));
+        process.exit(1);
+      }
+    });
+
+  items
+    .command('duplicate <boardId> <itemId>')
+    .description('Duplicate an item')
+    .option('--with-updates', 'Also copy item updates/comments')
+    .action(async (boardId: string, itemId: string, opts: { withUpdates?: boolean }) => {
+      try {
+        const client = clientFactory();
+        const result = await duplicateItem(client, boardId, itemId, opts.withUpdates);
+        printJson(result.duplicate_item);
       } catch (err) {
         console.error(chalk.red((err as Error).message));
         process.exit(1);

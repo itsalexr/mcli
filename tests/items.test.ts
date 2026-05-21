@@ -4,6 +4,8 @@ import {
   updateItemColumns,
   deleteItem,
   moveItemToGroup,
+  createSubitem,
+  duplicateItem,
   ItemsPageResult,
 } from '../src/commands/items';
 import { createMockClient } from './helpers/mock-client';
@@ -175,5 +177,72 @@ describe('moveItemToGroup', () => {
     const mock = createMockClient();
     mock.setError('Group not found');
     await expect(moveItemToGroup(mock.client, '101', 'bad_grp')).rejects.toThrow('Group not found');
+  });
+});
+
+describe('createSubitem', () => {
+  const SUBITEM_RESPONSE = {
+    create_subitem: { id: '200', name: 'Sub-task', url: 'https://monday.com/items/200', parent_item: { id: '101' } },
+  };
+
+  it('creates a subitem under a parent item', async () => {
+    const mock = createMockClient();
+    mock.setResponse(SUBITEM_RESPONSE);
+    const result = await createSubitem(mock.client, '101', { name: 'Sub-task' });
+    expect(result.create_subitem.id).toBe('200');
+    expect(result.create_subitem.parent_item.id).toBe('101');
+  });
+
+  it('passes parentItemId and itemName as variables', async () => {
+    const mock = createMockClient();
+    mock.setResponse(SUBITEM_RESPONSE);
+    await createSubitem(mock.client, '101', { name: 'Sub-task' });
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.parentItemId).toBe('101');
+    expect(vars.itemName).toBe('Sub-task');
+  });
+
+  it('passes columnValues when provided', async () => {
+    const mock = createMockClient();
+    mock.setResponse(SUBITEM_RESPONSE);
+    await createSubitem(mock.client, '101', { name: 'Sub', columnValues: '{"status": "Done"}' });
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.columnValues).toBe('{"status": "Done"}');
+  });
+
+  it('propagates errors', async () => {
+    const mock = createMockClient();
+    mock.setError('Parent not found');
+    await expect(createSubitem(mock.client, '999', { name: 'x' })).rejects.toThrow('Parent not found');
+  });
+});
+
+describe('duplicateItem', () => {
+  const DUPLICATE_RESPONSE = {
+    duplicate_item: { id: '201', name: 'Task A (copy)', url: 'https://monday.com/items/201' },
+  };
+
+  it('duplicates an item and returns the new item', async () => {
+    const mock = createMockClient();
+    mock.setResponse(DUPLICATE_RESPONSE);
+    const result = await duplicateItem(mock.client, '10', '101');
+    expect(result.duplicate_item.id).toBe('201');
+    expect(result.duplicate_item.name).toBe('Task A (copy)');
+  });
+
+  it('passes boardId, itemId, and withUpdates as variables', async () => {
+    const mock = createMockClient();
+    mock.setResponse(DUPLICATE_RESPONSE);
+    await duplicateItem(mock.client, '10', '101', true);
+    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
+    expect(vars.boardId).toBe('10');
+    expect(vars.itemId).toBe('101');
+    expect(vars.withUpdates).toBe(true);
+  });
+
+  it('propagates errors', async () => {
+    const mock = createMockClient();
+    mock.setError('Item not found');
+    await expect(duplicateItem(mock.client, '10', '999')).rejects.toThrow('Item not found');
   });
 });

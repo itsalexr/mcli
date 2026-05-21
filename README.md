@@ -18,13 +18,19 @@ Paste this as a message to your agent and it will set itself up:
 > Key commands:
 > - `npx @itsalexr/mcli boards list [--workspace-id <id>]`
 > - `npx @itsalexr/mcli boards schema <boardId>` — columns and groups
+> - `npx @itsalexr/mcli boards columns create <boardId> --type text --title "Notes"`
 > - `npx @itsalexr/mcli items list <boardId> [--columns] [--table]`
 > - `npx @itsalexr/mcli items create <boardId> --name "Task"`
+> - `npx @itsalexr/mcli items subitem <parentItemId> --name "Sub-task"`
+> - `npx @itsalexr/mcli items duplicate <boardId> <itemId>`
 > - `npx @itsalexr/mcli items delete <itemId>`
 > - `npx @itsalexr/mcli updates list <itemId>` — read comments
 > - `npx @itsalexr/mcli updates create <itemId> "comment text"`
+> - `npx @itsalexr/mcli docs list [--workspace-id <id>]`
+> - `npx @itsalexr/mcli docs create --workspace-id <id> --name "My Doc"`
 > - `npx @itsalexr/mcli users list`
-> - `npx @itsalexr/mcli search "term"`
+> - `npx @itsalexr/mcli users teams`
+> - `npx @itsalexr/mcli search "term" [--type boards|docs|all]`
 > - `npx @itsalexr/mcli graphql '<query>'`
 > ```
 >
@@ -66,6 +72,7 @@ export MONDAY_TOKEN=your_token_here
 mcli me
 mcli workspaces
 mcli workspaces --limit 10 --page 2
+mcli workspaces create --name "My Workspace" --kind open   # kind: open or closed
 ```
 
 ### Boards
@@ -78,6 +85,10 @@ mcli boards schema <boardId>                                # columns and groups
 mcli boards create --name "My Board"                        # kind: public (default), private, share
 mcli boards activity <boardId>                              # last 30 days by default
 mcli boards activity <boardId> --from 2026-01-01 --to 2026-02-01
+
+mcli boards columns create <boardId> --type text --title "Notes"
+mcli boards columns create <boardId> --type status --title "Priority" --description "Task priority"
+mcli boards columns delete <boardId> <columnId>
 ```
 
 ### Items
@@ -94,6 +105,9 @@ mcli items update-columns <boardId> <itemId> '{"status": "In Progress"}'
 
 mcli items delete <itemId>
 mcli items move <itemId> --group <groupId>
+mcli items subitem <parentItemId> --name "Sub-task"         # create subitem under a parent
+mcli items duplicate <boardId> <itemId>                     # duplicate an item
+mcli items duplicate <boardId> <itemId> --with-updates      # also copy comments
 ```
 
 ### Updates (comments)
@@ -111,12 +125,39 @@ mcli groups create <boardId> --name "Sprint 1"
 mcli groups create <boardId> --name "Done" --color done
 ```
 
-### Users
+### Users & teams
 
 ```bash
 mcli users list
 mcli users list --table
 mcli users list --limit 200 --page 2        # paginate for large accounts
+mcli users teams                             # list all teams
+mcli users teams --table
+```
+
+### Docs
+
+```bash
+mcli docs list                               # list all docs
+mcli docs list --workspace-id 12345          # filter by workspace
+mcli docs create --workspace-id 12345 --name "My Doc"
+mcli docs create --workspace-id 12345 --name "My Doc" --content "# Hello\nSome content"
+mcli docs create --workspace-id 12345 --name "My Doc" --kind private
+mcli docs content <docId> "## New Section\nContent here"   # add content to existing doc
+```
+
+### Folders
+
+```bash
+mcli folders create --workspace-id 12345 --name "Sprint Docs"
+mcli folders create --workspace-id 12345 --name "Archive" --color bright-red
+```
+
+### Notifications
+
+```bash
+mcli notifications create --user <userId> --target <itemId> --text "Task ready" --type Project
+mcli notifications create --user <userId> --target <updateId> --text "See this" --type Post
 ```
 
 ### Search
@@ -124,6 +165,8 @@ mcli users list --limit 200 --page 2        # paginate for large accounts
 ```bash
 mcli search "tasks"                          # search boards by name
 mcli search "tasks" --table
+mcli search "tasks" --type docs              # search docs only
+mcli search "tasks" --type all               # search boards and docs
 ```
 
 ### Raw GraphQL
