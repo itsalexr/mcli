@@ -35,10 +35,9 @@ export async function fetchUsers(
 }
 
 export async function fetchTeams(
-  client: GraphQLClient,
-  opts: { limit: number }
+  client: GraphQLClient
 ): Promise<TeamsListResult> {
-  return gqlRequest<TeamsListResult>(client, LIST_TEAMS_QUERY, { limit: opts.limit });
+  return gqlRequest<TeamsListResult>(client, LIST_TEAMS_QUERY, {});
 }
 
 const UsersListOptionsSchema = z.object({
@@ -46,9 +45,6 @@ const UsersListOptionsSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
 });
 
-const TeamsListOptionsSchema = z.object({
-  limit: z.coerce.number().int().positive().default(200),
-});
 
 export function registerUsers(program: Command, clientFactory: () => GraphQLClient): void {
   const users = program.command('users').description('Manage monday.com users');
@@ -85,13 +81,11 @@ export function registerUsers(program: Command, clientFactory: () => GraphQLClie
   users
     .command('teams')
     .description('List teams in the account')
-    .option('--limit <n>', 'Number of teams to return', '200')
-    .action(async (opts: { limit: string }) => {
+    .action(async () => {
       const format: OutputFormat = (program.opts().table as boolean | undefined) ? 'table' : 'json';
       try {
-        const { limit } = TeamsListOptionsSchema.parse(opts);
         const client = clientFactory();
-        const data = await fetchTeams(client, { limit });
+        const data = await fetchTeams(client);
         if (format === 'table') {
           printTable(
             ['ID', 'Name', 'Guest', 'Members'],

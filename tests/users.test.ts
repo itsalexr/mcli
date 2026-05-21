@@ -60,23 +60,15 @@ describe('fetchTeams', () => {
   it('returns teams list', async () => {
     const mock = createMockClient();
     mock.setResponse(TEAMS_RESPONSE);
-    const result = await fetchTeams(mock.client, { limit: 200 });
+    const result = await fetchTeams(mock.client);
     expect(result.teams).toHaveLength(2);
     expect(result.teams[0].name).toBe('Engineering');
     expect(result.teams[0].users).toHaveLength(2);
   });
 
-  it('passes limit variable', async () => {
-    const mock = createMockClient();
-    mock.setResponse(TEAMS_RESPONSE);
-    await fetchTeams(mock.client, { limit: 50 });
-    const vars = mock.request.mock.calls[0][1] as Record<string, unknown>;
-    expect(vars.limit).toBe(50);
-  });
-
   it('propagates errors', async () => {
     const mock = createMockClient();
     mock.setError('Forbidden');
-    await expect(fetchTeams(mock.client, { limit: 200 })).rejects.toThrow('Forbidden');
+    await expect(fetchTeams(mock.client)).rejects.toThrow('Forbidden');
   });
 });

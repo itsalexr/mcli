@@ -14,8 +14,8 @@ export const LIST_USERS_QUERY = gql`
 `;
 
 export const LIST_TEAMS_QUERY = gql`
-  query listTeams($limit: Int) {
-    teams(limit: $limit) {
+  query listTeams {
+    teams {
       id
       name
       is_guest
