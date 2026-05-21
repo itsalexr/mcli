@@ -39,6 +39,11 @@ jobs:
       - name: Verify package contents
         run: npm pack --dry-run
 
+      - name: Verify publish identity
+        run: |
+          node -p "'package: ' + require('./package.json').name + '@' + require('./package.json').version"
+          node -p "'repository: ' + require('./package.json').repository.url"
+
       - name: Check whether version is already published
         id: version
         shell: bash
