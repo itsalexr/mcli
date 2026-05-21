@@ -322,19 +322,17 @@ export function registerBoards(program: Command, clientFactory: () => GraphQLCli
   boards
     .command('activity <boardId>')
     .description('Get board activity log')
-    .option('--from <date>', 'Start date (ISO 8601)', () => {
-      const d = new Date();
-      d.setDate(d.getDate() - 30);
-      return d.toISOString();
-    })
-    .option('--to <date>', 'End date (ISO 8601)', new Date().toISOString())
+    .option('--from <date>', 'Start date (ISO 8601, e.g. 2026-01-01)')
+    .option('--to <date>', 'End date (ISO 8601, e.g. 2026-02-01)')
     .option('--limit <n>', 'Number of entries to return', '50')
-    .action(async (boardId: string, opts: { from: string; to: string; limit: string }) => {
+    .action(async (boardId: string, opts: { from?: string; to?: string; limit: string }) => {
       const format: OutputFormat = (program.opts().table as boolean | undefined) ? 'table' : 'json';
       try {
         const { limit } = BoardActivityOptionsSchema.parse({ limit: opts.limit });
+        const from = opts.from ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+        const to = opts.to ?? new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
         const client = clientFactory();
-        const data = await fetchBoardActivity(client, boardId, { from: opts.from, to: opts.to, limit });
+        const data = await fetchBoardActivity(client, boardId, { from, to, limit });
         const logs = data.boards[0]?.activity_logs ?? [];
         if (format === 'table') {
           printTable(

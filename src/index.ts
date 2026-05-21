@@ -22,7 +22,7 @@ const program = new Command();
 program
   .name('mcli')
   .description('monday.com CLI')
-  .version('1.2.1')
+  .version('1.2.2')
   .option('--table', 'Output as human-readable table instead of JSON');
 
 const clientFactory = () => createClient(loadConfig());
