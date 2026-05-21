@@ -2,6 +2,10 @@
   "name": "@itsalexr/mcli",
   "version": "1.2.1",
   "description": "monday.com CLI for Claude Code and coding agents",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itsalexr/mcli.git"
+  },
   "bin": {
     "mcli": "dist/index.js"
   },

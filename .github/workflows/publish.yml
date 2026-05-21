@@ -16,6 +16,9 @@ jobs:
   publish:
     if: github.repository == 'itsalexr/mcli' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -24,7 +27,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
 
       - name: Install dependencies
@@ -38,6 +40,16 @@ jobs:
 
       - name: Verify package contents
         run: npm pack --dry-run
+
+      - name: Verify publish identity
+        run: |
+          node -p "'package: ' + require('./package.json').name + '@' + require('./package.json').version"
+          node -p "'repository: ' + require('./package.json').repository.url"
+
+      - name: Verify OIDC token access
+        run: |
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
 
       - name: Check whether version is already published
         id: version
@@ -55,4 +67,4 @@ jobs:
 
       - name: Publish
         if: steps.version.outputs.publish == 'true'
-        run: npm publish --access public
+        run: npm publish --access public --registry https://registry.npmjs.org/
